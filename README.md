@@ -1,11 +1,11 @@
-# `@shopify/shopify-app-express`
+# `@shopify/shopify-app-koa`
 
 <!-- ![Build Status]() -->
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE.md)
 [![npm version](https://badge.fury.io/js/%40shopify%2Fshopify-app-express.svg)](https://badge.fury.io/js/%40shopify%2Fshopify-app-express)
 
-This package makes it easy for [Express.js](https://expressjs.com/) apps to integrate with Shopify.
+This package makes it easy for [Koa](https://koajs.com/) apps to integrate with Shopify.
 It builds on the `@shopify/shopify-api` package and creates a middleware layer that allows the app to communicate with and authenticate requests from Shopify.
 
 > **Note**: this package will enable your app's backend to work with Shopify APIs, and by default it will behave as an [embedded app](https://shopify.dev/docs/apps/auth/oauth/session-tokens). You'll need to use [Shopify App Bridge](https://shopify.dev/docs/apps/tools/app-bridge) in your frontend to authenticate requests to the backend.
