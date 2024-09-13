@@ -1,0 +1,1 @@
+export const SHOPIFY_KOA_LIBRARY_VERSION = '0.0.1';
