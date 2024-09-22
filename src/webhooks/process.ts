@@ -6,8 +6,10 @@ export async function process({
   config,
 }: WebhookProcessParams): Promise<void> {
   try {
+    const isJson = ctx.request.is('application/json');
+    const rawBody = isJson ? JSON.stringify(ctx.request.body) : ctx.request.body;
     await api.webhooks.process({
-      rawBody: ctx.request.body,
+      rawBody: rawBody,
       rawRequest: ctx.req, // Koa's raw Node.js request object
       rawResponse: ctx.res, // Koa's raw Node.js response object
     });

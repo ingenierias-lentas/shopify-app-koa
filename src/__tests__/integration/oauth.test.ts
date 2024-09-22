@@ -1,4 +1,5 @@
 import Koa from 'koa';
+import bodyParser from '@koa/bodyparser';
 import Router from '@koa/router';
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
@@ -119,6 +120,15 @@ describe('OAuth integration tests', () => {
       router.get('/installed', shopify.ensureInstalledOnShop(), installedMock);
       router.get('/authed', shopify.validateAuthenticatedSession(), authedMock);
 
+      app.use(bodyParser({
+        enableTypes: ['json', 'text'], // Enable both JSON and text parsing
+        encoding: 'utf-8',
+        jsonLimit: '1mb', // Adjust the limit as needed
+        textLimit: '1mb',
+        extendTypes: {
+          text: ['text/plain'], // Only treat text/plain as text
+        },
+      }));
       app.use(router.routes()).use(router.allowedMethods());
 
       const callbackInfo = await beginOAuth(app, shopify, config);
@@ -370,6 +380,7 @@ async function webhookProcessRequest(
 ) {
   await request(app.callback())
     .post('/test/webhooks')
+    .set('Content-Type', 'application/json') // Ensure this header is set
     .set(validWebhookHeaders(topic, body, shopify.api.config.apiSecretKey))
     .send(body)
     .expect(200);

@@ -1,4 +1,5 @@
 import Koa from 'koa';
+import bodyParser from '@koa/bodyparser';
 import Router from '@koa/router';
 import request from 'supertest';
 import {LATEST_API_VERSION, LogSeverity} from '@shopify/shopify-api';
@@ -71,6 +72,15 @@ describe('webhook integration', () => {
             ...shopify.processWebhooks({webhookHandlers: {APP_UNINSTALLED: config.handler}})
           );
 
+          app.use(bodyParser({
+            enableTypes: ['json', 'text'], // Enable both JSON and text parsing
+            encoding: 'utf-8',
+            jsonLimit: '1mb', // Adjust the limit as needed
+            textLimit: '1mb',
+            extendTypes: {
+              text: ['text/plain'], // Only treat text/plain as text
+            },
+          }));
           app.use(router.routes()).use(router.allowedMethods());
         });
 
@@ -194,6 +204,7 @@ async function triggerWebhook(app: Koa) {
 
   await request(app.callback())
     .post('/test/webhooks')
+    .set('Content-Type', 'application/json') // Ensure this header is set
     .set(
       validWebhookHeaders(
         'APP_UNINSTALLED',
