@@ -9,6 +9,7 @@ jobs:
   release:
     name: Release Changeset Version
     runs-on: ubuntu-latest
+    environment: release  # Specify the environment
 
     steps:
       # Checkout the repository
