@@ -1,0 +1,38 @@
+name: Release Changeset Version
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    name: Release Changeset Version
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      # Set up Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.12.0'
+          cache: 'npm'
+      
+      # Install the specified npm version
+      - name: Install npm
+        run: npm install -g npm@10.8.2
+
+      # Install dependencies
+      - name: Install Dependencies
+        run: npm ci
+
+      # Create the build and publish using changeset
+      - name: Publish Changeset
+        run: npm run release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

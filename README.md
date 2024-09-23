@@ -28,52 +28,13 @@ mkdir /my/project/path
 # Set up a new yarn project
 yarn init .
 # You can use your preferred Node package manager
-yarn add @shopify/shopify-app-express
+yarn add shopify-app-koa
 ```
 
 Then, you can import the package in your app by creating an `index.js` file containing:
 
-```ts
-const express = require('express');
-const {shopifyApp} = require('@shopify/shopify-app-express');
-
-const PORT = 8080;
-
-const shopify = shopifyApp({
-  api: {
-    apiKey: 'ApiKeyFromPartnersDashboard',
-    apiSecretKey: 'ApiSecretKeyFromPartnersDashboard',
-    scopes: ['your_scopes'],
-    hostScheme: 'http',
-    hostName: `localhost:${PORT}`,
-  },
-  auth: {
-    path: '/api/auth',
-    callbackPath: '/api/auth/callback',
-  },
-  webhooks: {
-    path: '/api/webhooks',
-  },
-});
-
-const app = express();
-
-app.get(shopify.config.auth.path, shopify.auth.begin());
-app.get(
-  shopify.config.auth.callbackPath,
-  shopify.auth.callback(),
-  shopify.redirectToShopifyOrAppRoot(),
-);
-app.post(
-  shopify.config.webhooks.path,
-  shopify.processWebhooks({webhookHandlers}),
-);
-
-app.get('/', shopify.ensureInstalledOnShop(), (req, res) => {
-  res.send('Hello world!');
-});
-
-app.listen(PORT, () => console.log('Server started'));
+```javascript
+//TODO
 ```
 
 Once you set the appropriate configuration values, you can then run your Express app as usual, for instance using:
