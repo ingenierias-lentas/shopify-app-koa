@@ -1,0 +1,18 @@
+{
+    "env": {
+      "node": true,
+      "es2021": true
+    },
+    "extends": [
+      "eslint:recommended"
+    ],
+    "parserOptions": {
+      "ecmaVersion": 12,
+      "sourceType": "script"  // Use "module" if you're using ES Modules
+    },
+    "rules": {
+      "global-require": "off",       // Allows require() to be used
+      "no-undef": "off"              // Allowing use of undefined variables for CommonJS compatibility
+    }
+  }
+  

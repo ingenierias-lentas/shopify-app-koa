@@ -3,7 +3,7 @@
 <!-- ![Build Status]() -->
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE.md)
-[![npm version](https://badge.fury.io/js/%40shopify%2Fshopify-app-express.svg)](https://badge.fury.io/js/%40shopify%2Fshopify-app-express)
+[![npm version](https://badge.fury.io/js/@ingenierias-lentas%2Fshopify-app-koa.svg)](https://badge.fury.io/js/@ingenierias-lentas%2Fshopify-app-koa)
 
 This package makes it easy for [Koa](https://koajs.com/) apps to integrate with Shopify.
 It builds on the `@shopify/shopify-api` package and creates a middleware layer that allows the app to communicate with and authenticate requests from Shopify.
@@ -16,7 +16,7 @@ To follow these usage guides, you will need to:
 
 - have a Shopify Partner account and development store
 - have an app already set up on your partner account
-- have a JavaScript package manager such as [yarn](https://yarnpkg.com) installed
+- have a JavaScript package manager such as [npm](https://www.npmjs.com/) installed
 
 ## Getting started
 
@@ -26,15 +26,54 @@ To install this package, you can run this on your terminal:
 # Create your project folder
 mkdir /my/project/path
 # Set up a new yarn project
-yarn init .
+npm init -y
 # You can use your preferred Node package manager
-yarn add shopify-app-koa
+npm install shopify-app-koa
 ```
 
 Then, you can import the package in your app by creating an `index.js` file containing:
 
 ```javascript
-//TODO
+const express = require('express');
+const {shopifyApp} = require('@shopify/shopify-app-express');
+
+const PORT = 8080;
+
+const shopify = shopifyApp({
+  api: {
+    apiKey: 'ApiKeyFromPartnersDashboard',
+    apiSecretKey: 'ApiSecretKeyFromPartnersDashboard',
+    scopes: ['your_scopes'],
+    hostScheme: 'http',
+    hostName: `localhost:${PORT}`,
+  },
+  auth: {
+    path: '/api/auth',
+    callbackPath: '/api/auth/callback',
+  },
+  webhooks: {
+    path: '/api/webhooks',
+  },
+});
+
+const app = express();
+
+app.get(shopify.config.auth.path, shopify.auth.begin());
+app.get(
+  shopify.config.auth.callbackPath,
+  shopify.auth.callback(),
+  shopify.redirectToShopifyOrAppRoot(),
+);
+app.post(
+  shopify.config.webhooks.path,
+  shopify.processWebhooks({webhookHandlers}),
+);
+
+app.get('/', shopify.ensureInstalledOnShop(), (req, res) => {
+  res.send('Hello world!');
+});
+
+app.listen(PORT, () => console.log('Server started'));
 ```
 
 Once you set the appropriate configuration values, you can then run your Express app as usual, for instance using:

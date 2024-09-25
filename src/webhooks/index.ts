@@ -1,6 +1,6 @@
 import Koa from 'koa';
 //import Router from '@koa/router';
-import bodyParser from '@koa/bodyparser'; // Koa body parsing middleware for JSON/text
+import {bodyParser} from '@koa/bodyparser'; // Koa body parsing middleware for JSON/text
 import { AddHandlersParams, DeliveryMethod, Shopify } from '@shopify/shopify-api';
 
 import { AppConfigInterface } from '../config-types';

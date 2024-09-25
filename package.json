@@ -89,5 +89,9 @@
     "dist/*",
     "!tsconfig.tsbuildinfo",
     "!node_modules"
+  ],
+  "workspaces": [
+    "./",
+    "examples/simple-app"
   ]
 }
