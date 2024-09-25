@@ -1,6 +1,6 @@
 {
   "name": "@ingenierias-lentas/shopify-app-koa",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Shopify Koa Middleware - to simplify the building of Shopify Apps with Koa",
   "repository": {
     "type": "git",
