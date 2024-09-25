@@ -31,6 +31,12 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
+      # Set npm auth token
+      - name: Set NPM Auth Token
+        run: npm config set //registry.npmjs.org/:_authToken=${NPM_TOKEN}
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
       # Create the build and publish using changeset
       - name: Publish Changeset
         run: npm run release
