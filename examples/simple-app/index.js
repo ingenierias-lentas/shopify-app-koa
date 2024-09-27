@@ -3,16 +3,25 @@ const Router = require('@koa/router');
 const { bodyParser } = require('@koa/bodyparser');
 const { shopifyApp } = require('@ingenierias-lentas/shopify-app-koa'); // Assuming you are using your own package version
 const { DeliveryMethod } = require('@shopify/shopify-api');
+const { SHOPIFY_HOST } = require('@shopify/shopify-api/test-helpers');
 
-const PORT = 8080;
+require('dotenv').config();
+
+const {
+    SHOPIFY_API_KEY,
+    SHOPIFY_API_SECRET,
+    SHOPIFY_HOST_SCHEME,
+    SHOPIFY_HOST_NAME,
+} = process.env;
 
 const shopify = shopifyApp({
   api: {
-    apiKey: 'ApiKeyFromPartnersDashboard',
-    apiSecretKey: 'ApiSecretKeyFromPartnersDashboard',
-    scopes: ['your_scopes'],
-    hostScheme: 'http',
-    hostName: `localhost:${PORT}`,
+    apiKey: SHOPIFY_API_KEY,
+    apiSecretKey: SHOPIFY_API_SECRET,
+    scopes: [''],
+    hostScheme: SHOPIFY_HOST_SCHEME,
+    hostName: SHOPIFY_HOST_NAME,
+    isEmbeddedApp: false,
   },
   auth: {
     path: '/api/auth',
@@ -32,16 +41,32 @@ function handleWebhookRequest(
     context
 ) {
     const sessionId = shopify.session.getOfflineId(shop);
+    console.log(`Webhook received for shop ${shop} with session ID ${sessionId}`);
+    console.log(`Request: ${JSON.stringify(context.request)}`);
 
     // Run your webhook-processing code here!
 }
 const webhookHandlers = {
-    TEST_TOPIC: [
+    CUSTOMERS_DATA_REQUEST: [
         {
             deliveryMethod: DeliveryMethod.Http,
-            callbackUrl: '/api/webhooks',
             callback: handleWebhookRequest,
-        },
+            callbackUrl: '/api/webhooks',
+        }
+    ],
+    CUSTOMERS_REDACT: [
+        {
+            deliveryMethod: DeliveryMethod.Http,
+            callback: handleWebhookRequest,
+            callbackUrl: '/api/webhooks',
+        }
+    ],
+    SHOP_REDACT: [
+        {
+            deliveryMethod: DeliveryMethod.Http,
+            callback: handleWebhookRequest,
+            callbackUrl: '/api/webhooks',
+        }
     ],
 };
 
@@ -72,11 +97,11 @@ router.post(
 );
 
 // Root route with Shopify installation check
-router.get('/', shopify.ensureInstalledOnShop(), async (ctx) => {
+router.get('/', shopify.validateAuthenticatedSession(), async (ctx) => {
   ctx.body = 'Hello world!';
 });
 
 // Apply routes and middleware
 app.use(router.routes()).use(router.allowedMethods());
 
-app.listen(PORT, () => console.log(`Server started on http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`Server started on ${SHOPIFY_HOST_SCHEME}://${SHOPIFY_HOST_NAME}`));

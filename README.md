@@ -34,18 +34,30 @@ npm install shopify-app-koa
 Then, you can import the package in your app by creating an `index.js` file containing:
 
 ```javascript
-const express = require('express');
-const {shopifyApp} = require('@shopify/shopify-app-express');
+const Koa = require('koa');
+const Router = require('@koa/router');
+const { bodyParser } = require('@koa/bodyparser');
+const { shopifyApp } = require('@ingenierias-lentas/shopify-app-koa'); // Assuming you are using your own package version
+const { DeliveryMethod } = require('@shopify/shopify-api');
+const { SHOPIFY_HOST } = require('@shopify/shopify-api/test-helpers');
 
-const PORT = 8080;
+require('dotenv').config();
+
+const {
+    SHOPIFY_API_KEY,
+    SHOPIFY_API_SECRET,
+    SHOPIFY_HOST_SCHEME,
+    SHOPIFY_HOST_NAME,
+} = process.env;
 
 const shopify = shopifyApp({
   api: {
-    apiKey: 'ApiKeyFromPartnersDashboard',
-    apiSecretKey: 'ApiSecretKeyFromPartnersDashboard',
-    scopes: ['your_scopes'],
-    hostScheme: 'http',
-    hostName: `localhost:${PORT}`,
+    apiKey: SHOPIFY_API_KEY,
+    apiSecretKey: SHOPIFY_API_SECRET,
+    scopes: [''],
+    hostScheme: SHOPIFY_HOST_SCHEME,
+    hostName: SHOPIFY_HOST_NAME,
+    isEmbeddedApp: false,
   },
   auth: {
     path: '/api/auth',
@@ -56,24 +68,79 @@ const shopify = shopifyApp({
   },
 });
 
-const app = express();
+function handleWebhookRequest(
+    topic,
+    shop,
+    webhookRequestBody,
+    webhookId,
+    apiVersion,
+    context
+) {
+    const sessionId = shopify.session.getOfflineId(shop);
+    console.log(`Webhook received for shop ${shop} with session ID ${sessionId}`);
+    console.log(`Request: ${JSON.stringify(context.request)}`);
 
-app.get(shopify.config.auth.path, shopify.auth.begin());
-app.get(
+    // Run your webhook-processing code here!
+}
+const webhookHandlers = {
+    CUSTOMERS_DATA_REQUEST: [
+        {
+            deliveryMethod: DeliveryMethod.Http,
+            callback: handleWebhookRequest,
+            callbackUrl: '/api/webhooks',
+        }
+    ],
+    CUSTOMERS_REDACT: [
+        {
+            deliveryMethod: DeliveryMethod.Http,
+            callback: handleWebhookRequest,
+            callbackUrl: '/api/webhooks',
+        }
+    ],
+    SHOP_REDACT: [
+        {
+            deliveryMethod: DeliveryMethod.Http,
+            callback: handleWebhookRequest,
+            callbackUrl: '/api/webhooks',
+        }
+    ],
+};
+
+const app = new Koa();
+const router = new Router();
+
+// Add body parser for handling POST requests
+app.use(bodyParser({
+    enableTypes: ['json', 'text'], // Enable both JSON and text parsing
+    encoding: 'utf-8',
+    extendTypes: {
+        text: ['text/plain'], // Only treat text/plain as text
+    },
+}));
+
+// Shopify Auth Routes
+router.get(shopify.config.auth.path, shopify.auth.begin());
+router.get(
   shopify.config.auth.callbackPath,
   shopify.auth.callback(),
   shopify.redirectToShopifyOrAppRoot(),
 );
-app.post(
+
+// Shopify Webhook handling route
+router.post(
   shopify.config.webhooks.path,
-  shopify.processWebhooks({webhookHandlers}),
+  ...shopify.processWebhooks({ webhookHandlers })
 );
 
-app.get('/', shopify.ensureInstalledOnShop(), (req, res) => {
-  res.send('Hello world!');
+// Root route with Shopify installation check
+router.get('/', shopify.validateAuthenticatedSession(), async (ctx) => {
+  ctx.body = 'Hello world!';
 });
 
-app.listen(PORT, () => console.log('Server started'));
+// Apply routes and middleware
+app.use(router.routes()).use(router.allowedMethods());
+
+app.listen(PORT, () => console.log(`Server started on ${SHOPIFY_HOST_SCHEME}://${SHOPIFY_HOST_NAME}`));
 ```
 
 Once you set the appropriate configuration values, you can then run your Express app as usual, for instance using:
@@ -90,4 +157,4 @@ To load your app within the Shopify Admin app, you need to:
 
 ## Next steps
 
-Now that your app is up and running, you can learn more about the `shopifyApp` object in [the reference docs](./docs/reference/shopifyApp.md).
+Now that your app is up and running, you can learn more about the `shopifyApp` object in [the reference docs](https://github.com/Shopify/shopify-app-js/tree/main/packages/apps/shopify-api/docs/reference).
