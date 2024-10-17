@@ -147,7 +147,8 @@ Once you set the appropriate configuration values, you can then run your Express
 
 ```bash
 node ./index.js
-# For local
+# For local, install localtunnel
+# Then add the localtunnel url to the .env file
 lt --port 8080
 ```
 
