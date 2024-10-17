@@ -12,6 +12,7 @@ const {
     SHOPIFY_API_SECRET,
     SHOPIFY_HOST_SCHEME,
     SHOPIFY_HOST_NAME,
+    PORT,
 } = process.env;
 
 const shopify = shopifyApp({

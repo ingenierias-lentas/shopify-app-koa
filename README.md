@@ -147,6 +147,8 @@ Once you set the appropriate configuration values, you can then run your Express
 
 ```bash
 node ./index.js
+# For local
+lt --port 8080
 ```
 
 To load your app within the Shopify Admin app, you need to:
